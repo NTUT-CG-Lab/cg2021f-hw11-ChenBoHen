@@ -133,12 +133,12 @@
                 <label class="btnLabel noDisplay"><input type="file" name="settingForm" accept=".raw">load .raw</label>
                 <label class="btnLabel noDisplay"><input type="file" name="settingForm" accept=".tf">load .tf</label>
                 <label class="btnLabel noDisplay"><input type="file" name="settingForm" accept=".sbdat">load .sbdat</label>
-                <label class="btnLabel noDisplay" name="settingForm">sized based</label>
+                <label class="btnLabel" name="settingForm">sized based</label>
                 <label class="btnLabel noDisplay" name="settingForm">save .tf</label>
                 <label class="btnLabel noDisplay" name="settingForm">save .sbdat</label>
             </div>
-            <div class="radioSpace">
-                <label><input type="radio" name="rtype" value="mips" checked>MIPS</label>
+            <div class=" noDisplay" >
+                <label><input type="radio"name="rtype" value="mips" checked>MIPS</label>
                 <label><input type="radio" name="rtype" value="iso">ISO</label>
             </div>
             <div id="palette"></div>
@@ -151,7 +151,7 @@
     <script src="js/scoreoutputer.min.js"></script>
     <script>
         // 建構子 ScoreOutputer 接受一個字串，該字串為 csv 的檔案名稱
-        var so = new ScoreOutputer("109114514");
+        var so = new ScoreOutputer("109598019");
         so.installCSS(function () {
             // 安裝 bootstrap 的 css，如果在 html 上方引用 bootstrap 5.1.1 的話就不用使用 installCSS ，注意一定要 bootstrap css 5.1.1 版
             // installCSS 接收一個 callback 當作參數，作為成功安裝 bootstrap css 的回呼函式
@@ -163,9 +163,9 @@
             //有幾個項目就呼叫幾個 addChild
             //addChild 要比 renderModal 先呼叫
             so.addChild("讀取文件並顯示資訊", 4, true);
-            so.addChild("使用直接法渲染影像(MIPS)", 2, true);
-            so.addChild("使用直接法渲染影像(ISO)", 2, true);
-            so.addChild("使用調色盤變更材質的colormap", 2, false);
+            so.addChild("使用直接法渲染影像", 2, true);
+            so.addChild("使用transfer function渲染影像", 2, true);
+            so.addChild("調色盤變更紋理", 2, true);
 
             //產生自評表，參數如下所示
             so.renderModal(
@@ -203,7 +203,7 @@
 
         const fileRegex = /(\w+)_(\d+)_(\d+)_(\d+)_(\w+)\.*/;
 
-        let field, controlView, modelView = null
+        let field, controlView, modelView
         let arg = new colorSetting()
 
         let getColormap = function () {
@@ -324,12 +324,11 @@
 
             let elements = document.getElementsByName('settingForm')
 
-            //MIPS or ISO
-            document.querySelectorAll('input[name=rtype]').forEach((option) => {
-                option.addEventListener('click', (evt) => { })
-            })
+            // 執行Sizebased transfer function
+            elements[3].addEventListener('click', (evt) => {})
 
-            arg.renderType = 0
+            // 預設以ISO渲染
+            arg.renderType = 1
 
             // RAW文件讀取
             loadLocalRawFile('./raw/CTchest_64_64_64_uint8.raw', (result) => {
@@ -342,21 +341,23 @@
                 field = new ScaleField(width, height, depth, data, arg.rgba)
                 controlView.updateVolumeData(field)
             })
+
         }
 
         window.onload = () => {
-            modelView = new threejsViewer(document.body);
-            controlView = new ControlView(document.getElementById('palette'), arg);
+            modelView = new threejsViewer(document.body)
+            controlView = new ControlView(document.getElementById('palette'), arg)
 
             //當調色盤的參數變更時，觸發事件
             controlView.addEventListener('change', () => {
-                // if(field == null){
-                //     console.log(field.dims)
-                    modelView.renderVolume(field, getColormap(), arg);
-                // }
+                
+                if(field == null){
+                    // console.log(field.dims)
+                    return 
+                }
+                modelView.renderVolume(field, getColormap(), arg);
             })
-
-            init();
+            init()
         }
     </script>
 
